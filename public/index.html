@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CodeArena</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Fira+Code:wght@400;500;600&family=Press+Start+2P&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <div id="toast-container"></div>
+
+    <!-- AUTH VIEW (Initial Screen) -->
+    <section id="auth-view">
+        <div class="auth-card">
+            <h1 class="auth-title">Code Arena</h1>
+            <p class="auth-subtitle">Sign in to start competing</p>
+            <div id="auth-forms-container"></div>
+            <div class="auth-toggle">
+                <span id="auth-toggle-text">New here?</span>
+                <button class="btn-link" onclick="app.toggleAuthMode()" id="auth-toggle-btn">Create Account</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- MAIN APP VIEW (After Login) -->
+    <section id="app-view" class="hidden">
+        
+        
+        <!-- NAVBAR -->
+        <nav class="navbar">
+            <div class="nav-brand">Code Arena</div>
+            <div class="nav-links">
+                <a href="#" class="nav-link active" onclick="ui.navigateTo('problems')">Problems</a>
+                <a href="#" class="nav-link" onclick="ui.navigateTo('arena')">Arena</a>
+                <a href="#" class="nav-link" onclick="ui.navigateTo('leaderboard')">Leaderboard</a>
+                <div class="theme-switch-container">
+                    <select id="theme-select" onchange="ui.changeTheme(this.value)" class="theme-select">
+                        <option value="default">Default</option>
+                        <option value="neumorphism">Neumorphism</option>
+                        <option value="animation">Motion</option>
+                        <option value="pixel">Minecraft</option>
+                    </select>
+                </div>
+            </div>
+            <div class="nav-user">
+                <span id="user-display-nav"></span>
+                <button class="btn-secondary btn-sm" onclick="app.logout()">Logout</button>
+            </div>
+        </nav>
+
+        <!-- CONTAINER FOR ALL CONTENT -->
+        <div class="main-container">
+            
+            <!-- HERO SECTION (Visible on Problems Page) -->
+            <div id="section-hero" class="hero-section">
+                <h1 class="hero-title">Code Arena</h1>
+                <p class="hero-subtitle">Sharpen your algorithms. Race the clock. Climb the global ranks.</p>
+                <div class="hero-actions">
+                    <button class="btn-cta-primary" onclick="ui.openCreateModal()">Enter Arena</button>
+                    <button class="btn-cta-secondary" onclick="ui.scrollToProblems()">Browse Problems</button>
+                </div>
+            </div>
+
+            <!-- PROBLEMS SECTION -->
+            <div id="section-problems" class="content-section">
+                <div class="filter-bar">
+                    <button class="filter-btn active" onclick="ui.filterProblems('all')">All</button>
+                    <button class="filter-btn easy" onclick="ui.filterProblems('easy')">Easy</button>
+                    <button class="filter-btn medium" onclick="ui.filterProblems('medium')">Medium</button>
+                    <button class="filter-btn hard" onclick="ui.filterProblems('hard')">Hard</button>
+                </div>
+                <div id="problem-grid" class="problem-grid"></div>
+            </div>
+
+            <!-- ARENA SECTION (Live Rooms) -->
+            <div id="section-arena" class="content-section hidden">
+                <div class="section-header">
+                    <h2>Live Battles</h2>
+                    <button class="btn-primary" onclick="ui.openCreateModal()">+ Create Room</button>
+                </div>
+                <div class="arena-info">
+                    <input type="text" id="modal-join-code-alt" placeholder="Enter Room Code">
+                    <button class="btn-secondary" onclick="app.confirmJoinRoom(true)">Join</button>
+                </div>
+                <div id="room-list" class="room-grid"></div>
+            </div>
+
+            <!-- LEADERBOARD SECTION -->
+            <div id="section-leaderboard" class="content-section hidden">
+                <h2>Global Leaderboard</h2>
+                <p class="text-muted">Feature coming soon! Play battles to earn points.</p>
+                <div class="card" style="margin-top: 2rem; padding: 2rem; text-align: center;">
+                    <h3>Top Players</h3>
+                    <p>Win battles to get on the board!</p>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- ARENA GAME VIEW (The Coding Interface) -->
+    <section id="arena-view" class="hidden">
+        <header class="game-header">
+            <div class="flex items-center gap-4">
+                <span class="text-xl" style="font-weight: bold; color: white;">CodeArena</span>
+                <span class="mode-indicator mode-battle" id="mode-badge">BATTLE</span>
+                <button class="btn-secondary text-xs hidden" id="room-code-btn" onclick="app.copyRoomCode()">ROOM: ---</button>
+            </div>
+            <div class="flex items-center gap-4">
+                <div id="timer-container">
+                    <div class="text-xs text-muted">TIME</div>
+                    <div id="timer-display" style="font-family: var(--font-mono); font-weight: 600;">15:00</div>
+                </div>
+                <button class="btn-danger" onclick="app.leaveRoom()">Exit</button>
+            </div>
+        </header>
+
+        <div class="arena-main">
+            <div class="left-panel">
+                <div class="problem-split">
+                    <div class="editor-toolbar">
+                        <span>Problem</span>
+                        <select id="language-selector" onchange="editor.changeLanguage(this.value)">
+                            <option value="python">Python</option>
+                            <option value="cpp">C++</option>
+                            <option value="java">Java</option>
+                        </select>
+                    </div>
+                    <div class="problem-content" id="problem-description"></div>
+                </div>
+
+                <div class="editor-container">
+                    <div class="editor-toolbar">
+                        <span id="filename-display">main.py</span>
+                        <div class="flex gap-2">
+                            <button class="btn-secondary text-sm" onclick="editor.runCode()">▶ Run</button>
+                            <button class="btn-success text-sm" onclick="editor.submitCode()">⚡ Submit</button>
+                        </div>
+                    </div>
+                    <div class="code-wrapper">
+                        <div class="line-numbers" id="line-numbers">1</div>
+                        <textarea id="code-editor" spellcheck="false" oninput="editor.updateLineNumbers()" onkeydown="editor.handleTab(event)" onscroll="editor.syncScroll()"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div class="right-panel" id="right-panel">
+                <div class="panel-section">
+                    <div class="panel-header">Leaderboard</div>
+                    <ul class="leaderboard-list" id="leaderboard"></ul>
+                </div>
+                <div class="panel-section chat-area">
+                    <div class="panel-header">Chat</div>
+                    <div class="chat-messages" id="chat-box"></div>
+                    <div class="chat-input">
+                        <input type="text" id="chat-msg" placeholder="Message..." onkeypress="if(event.key === 'Enter') app.sendChat()">
+                        <button class="btn-primary btn-icon" onclick="app.sendChat()">➤</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="console-overlay">
+            <div class="console-header">
+                <span>OUTPUT</span>
+                <button class="btn-secondary btn-icon" onclick="editor.toggleConsole()">✕</button>
+            </div>
+            <div class="console-body" id="console-output"></div>
+        </div>
+    </section>
+
+    <!-- CREATE ROOM MODAL -->
+    <div id="create-room-modal" class="modal-overlay hidden">
+        <div class="modal-content" style="max-width: 900px;">
+            <h3 style="margin-bottom: 1rem;">Create Battle Room</h3>
+            
+            <div class="dashboard-nav" style="border:none; margin-bottom:1rem;">
+                <div class="nav-tab active" id="tab-standard" onclick="ui.switchCreateTab('standard')">Standard Problem</div>
+                <div class="nav-tab" id="tab-custom" onclick="ui.switchCreateTab('custom')">Custom Question</div>
+            </div>
+
+            <div id="create-standard-view">
+                <div id="problem-selection-list" class="problem-carousel"></div>
+                <div class="flex justify-between" style="margin-top: 1.5rem;">
+                    <button class="btn-secondary" onclick="ui.closeCreateModal()">Cancel</button>
+                    <button class="btn-primary" onclick="app.confirmCreateStandard()">Create Battle</button>
+                </div>
+            </div>
+
+            <div id="create-custom-view" class="hidden">
+                <div class="flex gap-4">
+                    <div class="form-group" style="flex:2">
+                        <label>Title</label>
+                        <input type="text" id="custom-title" placeholder="e.g. Valid Anagram">
+                    </div>
+                    <div class="form-group" style="flex:1">
+                        <label>Difficulty</label>
+                        <select id="custom-difficulty">
+                            <option value="Easy">Easy</option>
+                            <option value="Medium">Medium</option>
+                            <option value="Hard">Hard</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="custom-desc" style="height: 60px;"></textarea>
+                </div>
+                
+                <div style="border-top: 1px solid var(--border); margin: 1rem 0; padding-top: 1rem;">
+                    <h4 class="text-success">Sample Test Cases (Visible)</h4>
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+                        <div class="form-group" style="margin-bottom:0"><label>Input 1</label><textarea id="custom-sample-in-1" style="font-family: monospace; height: 40px;"></textarea></div>
+                        <div class="form-group" style="margin-bottom:0"><label>Output 1</label><textarea id="custom-sample-out-1" style="font-family: monospace; height: 40px;"></textarea></div>
+                    </div>
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+                        <div class="form-group" style="margin-bottom:0"><label>Input 2</label><textarea id="custom-sample-in-2" style="font-family: monospace; height: 40px;"></textarea></div>
+                        <div class="form-group" style="margin-bottom:0"><label>Output 2</label><textarea id="custom-sample-out-2" style="font-family: monospace; height: 40px;"></textarea></div>
+                    </div>
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <div class="form-group" style="margin-bottom:0"><label>Input 3</label><textarea id="custom-sample-in-3" style="font-family: monospace; height: 40px;"></textarea></div>
+                        <div class="form-group" style="margin-bottom:0"><label>Output 3</label><textarea id="custom-sample-out-3" style="font-family: monospace; height: 40px;"></textarea></div>
+                    </div>
+                </div>
+
+                <div style="border-top: 1px solid var(--border); margin: 1rem 0; padding-top: 1rem;">
+                    <h4 class="text-danger">Hidden Test Cases (JSON)</h4>
+                    <textarea id="custom-hidden-json" style="font-family: monospace; height: 80px; font-size: 0.8rem;" placeholder='[{"input": "test", "output": "result"}]'></textarea>
+                </div>
+
+                <div class="flex justify-between" style="margin-top: 1.5rem;">
+                    <button class="btn-secondary" onclick="ui.closeCreateModal()">Cancel</button>
+                    <button class="btn-primary" onclick="app.confirmCreateCustom()">Create Custom Battle</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="js/client.js"></script>
+</body>
+</html>
